@@ -1,4 +1,4 @@
-const CONTRACT_ADDRESS = '0x68448Db10C0dB115bCC60075BF9a378DC57775E1';
+const CONTRACT_ADDRESS = '0x29Ce1beBfd53c4838aef33E73021eD9c857112bA';
 
 const transformCharacterData = (characterData) => {
   return {
@@ -10,4 +10,11 @@ const transformCharacterData = (characterData) => {
   };
 };
 
-export { CONTRACT_ADDRESS, transformCharacterData };
+const transformImageURI = (imageURI) => {
+  if(!imageURI.startsWith('http')) {
+    return `https://cloudflare-ipfs.com/ipfs/${imageURI}`;
+  }
+  return imageURI;
+}
+
+export { CONTRACT_ADDRESS, transformCharacterData, transformImageURI };

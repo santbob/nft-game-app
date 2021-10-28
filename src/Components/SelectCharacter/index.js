@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './SelectCharacter.css';
 import { ethers } from 'ethers';
-import { CONTRACT_ADDRESS, transformCharacterData } from './../../constants';
+import { CONTRACT_ADDRESS, transformCharacterData, transformImageURI } from './../../constants';
 import MyEpicGame from './../../utils/MyEpicGame.json';
 import LoadingIndicator from './../LoadingIndicator';
 
@@ -34,7 +34,7 @@ const SelectCharacter = ({ setCharacterNFT }) => {
       <div className="name-container">
         <p>{character.name}</p>
       </div>
-      <img src={character.imageURI} alt={character.name} />
+      <img src={transformImageURI(character.imageURI)} alt={character.name} />
       <button
         type="button"
         className="character-mint-button"
@@ -73,9 +73,9 @@ const SelectCharacter = ({ setCharacterNFT }) => {
       console.log(`CharacterNFT minted - sender ${sender} tokenId: ${tokenId} characterIndex: ${characterIndex}`);
 
       if (gameContract) {
-        const character = await gameContract.getCharacterNFT(tokenId);
+        const character = await gameContract.checkIfUserHasNFT();
         console.log(`CharacterNFT minted - character ${character}`);
-        setCharacters(transformCharacterData(character));
+        setCharacterNFT(transformCharacterData(character));
       }
     }
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ethers } from 'ethers';
-import { CONTRACT_ADDRESS, transformCharacterData } from '../../constants';
+import { CONTRACT_ADDRESS, transformCharacterData, transformImageURI } from '../../constants';
 import MyEpicGame from '../../utils/MyEpicGame.json';
 import './Arena.css';
 import LoadingIndicator from './../LoadingIndicator';
@@ -100,7 +100,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
           <div className={`boss-content`}>
             <h2>🔥 {bigBoss.name} 🔥</h2>
             <div className="image-content">
-              <img src={bigBoss.imageURI} alt={`Boss ${bigBoss.name}`} />
+              <img src={transformImageURI(bigBoss.imageURI)} alt={`Boss ${bigBoss.name}`} />
               <div className="health-bar">
                 <progress value={bigBoss.hp} max={bigBoss.maxHp} />
                 <p>{`${bigBoss.hp} / ${bigBoss.maxHp} HP`}</p>
@@ -129,7 +129,7 @@ const Arena = ({ characterNFT, setCharacterNFT }) => {
               <div className="image-content">
                 <h2>{characterNFT.name}</h2>
                 <img
-                  src={characterNFT.imageURI}
+                  src={transformImageURI(characterNFT.imageURI)}
                   alt={`Character ${characterNFT.name}`}
                 />
                 <div className="health-bar">
