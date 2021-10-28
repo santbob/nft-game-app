@@ -1,10 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import twitterLogo from './assets/twitter-logo.svg';
 import './App.css';
 
 import { ethers } from 'ethers';
 import MyEpicGame from './utils/MyEpicGame.json';
 import SelectCharacter from './Components/SelectCharacter';
+import LoadingIndicator from './Components/LoadingIndicator';
+import Arena from './Components/Arena';
 import { CONTRACT_ADDRESS, transformCharacterData } from './constants';
 
 // Constants
@@ -16,62 +18,64 @@ const App = () => {
 
   const [currentAccount, setCurrentAccount] = useState(null);
   const [characterNFT, setCharacterNFT] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const checkWalletAndChain = async () => {
     const { ethereum } = window;
 
-      if(!ethereum){
-        console.log("Make sure you have MetaMask wallet")
-        return false;
-      } else {
-        console.log("Cool! you have the MetaMask wallet")
-      }
-      
-      let chainId = await ethereum.request({ method: 'eth_chainId' });
-      console.log("Connected to chain " + chainId);
+    if (!ethereum) {
+      console.log("Make sure you have MetaMask wallet")
+      return false;
+    } else {
+      console.log("Cool! you have the MetaMask wallet")
+    }
 
-      // String, hex code of the chainId of the Rinkebey test network
-      const rinkebyChainId = "0x4"; 
-      if (chainId !== rinkebyChainId) {
-        alert("You are not connected to the Rinkeby Test Network!");
-        return false;
-      }
+    let chainId = await ethereum.request({ method: 'eth_chainId' });
+    console.log("Connected to chain " + chainId);
 
-      return true;
+    // String, hex code of the chainId of the Rinkebey test network
+    const rinkebyChainId = "0x4";
+    if (chainId !== rinkebyChainId) {
+      alert("You are not connected to the Rinkeby Test Network!");
+      return false;
+    }
+
+    return true;
   }
 
 
   const checkIfWalletIsConnected = async () => {
-    const {ethereum} = window;
+    const { ethereum } = window;
 
     const hasValidWallet = await checkWalletAndChain();
-    if(!hasValidWallet) {
-      return;
-    }
+    if (hasValidWallet) {
 
-    const accounts = await ethereum.request({method: 'eth_accounts'})
 
-    if(accounts.length !== 0) {
-      const account = accounts[0];
-      console.log('Found an authorized account:', account);
-      setCurrentAccount(account);
-    } else {
-      console.log('No authorized account found');
+      const accounts = await ethereum.request({ method: 'eth_accounts' })
+
+      if (accounts.length !== 0) {
+        const account = accounts[0];
+        console.log('Found an authorized account:', account);
+        setCurrentAccount(account);
+      } else {
+        console.log('No authorized account found');
+      }
     }
+    setIsLoading(false);
   }
 
   const connectWalletAction = async () => {
 
-    const {ethereum} = window;
+    const { ethereum } = window;
 
     const hasValidWallet = await checkWalletAndChain();
-    if(!hasValidWallet) {
+    if (!hasValidWallet) {
       return;
     }
 
-    const accounts = await ethereum.request({method: 'eth_requestAccounts'});
+    const accounts = await ethereum.request({ method: 'eth_requestAccounts' });
 
-    if(accounts && accounts.length > 0) {
+    if (accounts && accounts.length > 0) {
       const account = accounts[0]
       console.log("Found an authorized account:", account);
       setCurrentAccount(account)
@@ -82,34 +86,40 @@ const App = () => {
   }
 
   const renderContent = () => {
-    if(!currentAccount) {
-        return (<div className="connect-wallet-container">
-            <img
-              src="https://media.giphy.com/media/3o7bu12GHm4G5frn6U/giphy.gif"
-              alt="Monty Python Gif"
-            />
-            {/*
+    if (isLoading) {
+      return <LoadingIndicator />
+    }
+    if (!currentAccount) {
+      return (<div className="connect-wallet-container">
+        <img
+          src="https://media.giphy.com/media/3o7bu12GHm4G5frn6U/giphy.gif"
+          alt="Facist Modi Gif"
+        />
+        {/*
              * Button that we will use to trigger wallet connect
              * Don't forget to add the onClick event to call your method!
              */}
-            <button
-              className="cta-button connect-wallet-button"
-              onClick={connectWalletAction}
-            >
-              Connect Wallet To Get Started
-            </button>
-          </div>)
-    } else if (currentAccount && !characterNFT) {
-        return <SelectCharacter setCharacterNFT={setCharacterNFT} />
+        <button
+          className="cta-button connect-wallet-button"
+          onClick={connectWalletAction}
+        >
+          Connect Wallet To Get Started
+        </button>
+      </div>)
+    } else if (!characterNFT) {
+      return <SelectCharacter setCharacterNFT={setCharacterNFT} />
+    } else {
+      console.log("rendering arena")
+      return <Arena characterNFT={characterNFT} setCharacterNFT={setCharacterNFT} />
     }
   }
 
   useEffect(() => {
+    setIsLoading(true);
     checkIfWalletIsConnected()
   }, [])
 
   useEffect(() => {
-
     const fetchMintedNFTCharacter = async () => {
       console.log('Checking for Character NFT on address:', currentAccount);
 
@@ -125,14 +135,15 @@ const App = () => {
       } else {
         console.log('No character NFT found!');
       }
+      setIsLoading(false);
     }
 
-    if(currentAccount) {
+    if (currentAccount) {
       console.log("Account exists let me find if there is an character exist for this Account");
       fetchMintedNFTCharacter();
     }
 
-  },[currentAccount])
+  }, [currentAccount])
 
   return (
     <div className="App">
